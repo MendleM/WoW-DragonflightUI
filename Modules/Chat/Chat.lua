@@ -195,6 +195,16 @@ function Module:OnEnable()
         Module:ApplySettings()
         Module:RefreshOptionScreens()
     end)
+
+    self:SecureHook('FCF_DockUpdate', function()
+        Module:ApplySettings()
+    end)
+
+    self:SecureHook('FCF_SelectDockFrame', function()
+    C_Timer.After(0, function()
+        Module:ApplySettings()
+    end)
+end)
 end
 
 function Module:OnDisable()
@@ -240,11 +250,15 @@ function Module:ApplySettingsInternal(sub, key)
         parent = _G[db.anchorFrame]
     end
 
-    ChatFrame1:SetPoint(db.anchor, parent, db.anchorParent, db.x, db.y)
-    ChatFrame1:SetSize(db.sizeX, db.sizeY)
-    ChatFrame1:SetUserPlaced(true)
+    local dockFrames = FCFDock_GetChatFrames(GENERAL_CHAT_DOCK)
+    for _, chatFrame in ipairs(dockFrames) do
+        chatFrame:SetClampedToScreen(false)
+        chatFrame:ClearAllPoints()
+        chatFrame:SetPoint(db.anchor, parent, db.anchorParent, db.x, db.y)
+        chatFrame:SetSize(db.sizeX, db.sizeY)
+        chatFrame:SetUserPlaced(true)
+    end
 
-    -- ChatFrame1:UpdateStateHandler(db)
 end
 
 local frame = CreateFrame('FRAME', 'DragonflightUIChatFrame', UIParent)
